@@ -1,0 +1,65 @@
+# NativeLens Unity Project - Git Ignore
+
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# MemoryCaptures can get excessive in size.
+[Mm]emoryCaptures/
+
+# Asset meta files should only be ignored when the corresponding asset is also ignored
+!/[Aa]ssets/**/*.meta
+
+# Uncomment this line if you wish to ignore the asset store tools plugin
+#/[Aa]ssets/Plugins/AssetStoreTools/
+
+# Visual Studio cache directory
+.vs/
+*.vscode/
+
+# Gradle cache directory
+.gradle/
+
+# Android build files
+*.apk
+*.aab
+
+# iOS build files
+*.ipa
+
+# Local user settings
+*.csproj
+*.sln
+*.userprefs
+*.pidb
+*.suo
+*.user
+*.unityproj
+*.booproj
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# NativeLens specific
+Assets/Resources/PlantData/*.png
+Assets/Resources/PlantData/*.jpg
+Assets/StreamingAssets/
+
+# Addressables
+Assets/AddressableAssetsData/
+Library/com.unity.addressables/
+
+# Logs
+*.log

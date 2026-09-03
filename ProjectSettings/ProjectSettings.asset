@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectSettings>
+  <setting name="productName" value="NativeLens" />
+  <setting name="companyName" value="NativeLens Team" />
+  <setting name="defaultScreenWidth" value="1080" />
+  <setting name="defaultScreenHeight" value="1920" />
+  <setting name="defaultScreenOrientation" value="Portrait" />
+  <setting name="targetDevice" value="2" />
+  <setting name="targetPlatform" value="Android" />
+  <setting name="graphicsAPIs" value="OpenGLES3,Vulkan" />
+  <setting name="minimumApiLevel" value="AndroidApiLevel24" />
+  <setting name="targetApiLevel" value="AndroidApiLevel34" />
+  <setting name="scriptingBackend" value="IL2CPP" />
+  <setting name="targetArchitectures" value="ARM64" />
+  <setting name="stripEngineCode" value="True" />
+  <setting name="useIncrementalGC" value="True" />
+</ProjectSettings>

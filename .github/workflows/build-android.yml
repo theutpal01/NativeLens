@@ -1,0 +1,118 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:  # Manual trigger via Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true  # Important for large assets
+      
+      # 2. Cache Unity Library folder (speeds up subsequent builds)
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: |
+            Library
+            Assets/AddressableAssetsData
+          key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-
+      
+      # 3. Install Unity
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: 2022.3.22f1
+          cacheKey: unity-${{ runner.os }}-2022.3.22f1
+      
+      # 4. Activate Unity License (Personal/Free)
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        # For Personal license, you can also use:
+        # UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_PERSONAL }}
+      
+      # 5. Build Android APK
+      - name: Build Android APK
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          targetPlatform: Android
+          buildMethod: NativeLens.Utils.SceneBootstrap/BuildAPK
+          customParameters: -quit -batchmode -nographics
+      
+      # 6. Upload APK as artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NativeLens-APK
+          path: build/NativeLens.apk
+          retention-days: 30
+      
+      # 7. Create Release (on tag push)
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/NativeLens.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Optional: Run tests
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: unity-library-test-${{ runner.os }}-${{ hashFiles('Packages/manifest.json') }}
+      
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: 2022.3.22f1
+      
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      
+      - name: Run Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          testMode: playmode
+          artifactsPath: test-results
+      
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test Results
+          path: test-results
