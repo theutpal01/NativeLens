@@ -34,14 +34,7 @@ jobs:
           restore-keys: |
             unity-library-${{ runner.os }}-
       
-      # 3. Install Unity
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: 2022.3.22f1
-          cacheKey: unity-${{ runner.os }}-2022.3.22f1
-      
-      # 4. Activate Unity License (Personal/Free)
+      # 3. Activate Unity License (Personal/Free)
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
@@ -49,7 +42,7 @@ jobs:
         # For Personal license, you can also use:
         # UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_PERSONAL }}
       
-      # 5. Build Android APK
+      # 4. Build Android APK
       - name: Build Android APK
         uses: game-ci/unity-builder@v2
         env:
@@ -59,7 +52,7 @@ jobs:
           buildMethod: NativeLens.Utils.SceneBootstrap/BuildAPK
           customParameters: -quit -batchmode -nographics
       
-      # 6. Upload APK as artifact
+      # 5. Upload APK as artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -67,7 +60,7 @@ jobs:
           path: build/NativeLens.apk
           retention-days: 30
       
-      # 7. Create Release (on tag push)
+      # 6. Create Release (on tag push)
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
@@ -91,11 +84,6 @@ jobs:
         with:
           path: Library
           key: unity-library-test-${{ runner.os }}-${{ hashFiles('Packages/manifest.json') }}
-      
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: 2022.3.22f1
       
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
