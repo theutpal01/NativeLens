@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE || secrets.UNITY_SECRET }}
+
 jobs:
   build-android:
     name: Build Android APK
@@ -33,20 +36,28 @@ jobs:
           key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
           restore-keys: |
             unity-library-${{ runner.os }}-
+
+      - name: Validate Unity license secret
+        shell: bash
+        run: |
+          if [ -z "${UNITY_LICENSE}" ]; then
+            echo "::error::Unity license is missing. Set repository secret UNITY_LICENSE or UNITY_SECRET with full Unity_lic.ulf content."
+            exit 1
+          fi
+          if [ "${#UNITY_LICENSE}" -lt 100 ]; then
+            echo "::error::Unity license secret appears incomplete. Paste the full Unity_lic.ulf content, not just the XML header."
+            exit 1
+          fi
       
       # 3. Activate Unity License (Personal/Free)
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         # For Personal license, you can also use:
         # UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_PERSONAL }}
       
       # 4. Build Android APK
       - name: Build Android APK
         uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           targetPlatform: Android
           buildMethod: NativeLens.Utils.SceneBootstrap/BuildAPK
@@ -84,16 +95,24 @@ jobs:
         with:
           path: Library
           key: unity-library-test-${{ runner.os }}-${{ hashFiles('Packages/manifest.json') }}
+
+      - name: Validate Unity license secret
+        shell: bash
+        run: |
+          if [ -z "${UNITY_LICENSE}" ]; then
+            echo "::error::Unity license is missing. Set repository secret UNITY_LICENSE or UNITY_SECRET with full Unity_lic.ulf content."
+            exit 1
+          fi
+          if [ "${#UNITY_LICENSE}" -lt 100 ]; then
+            echo "::error::Unity license secret appears incomplete. Paste the full Unity_lic.ulf content, not just the XML header."
+            exit 1
+          fi
       
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       
       - name: Run Tests
         uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           testMode: playmode
           artifactsPath: test-results
