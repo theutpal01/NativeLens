@@ -62,6 +62,7 @@ jobs:
           targetPlatform: Android
           buildMethod: NativeLens.Utils.SceneBootstrap/BuildAPK
           customParameters: -quit -batchmode -nographics
+          skipActivation: true
       
       # 5. Upload APK as artifact
       - name: Upload APK
