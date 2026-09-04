@@ -45,6 +45,7 @@ jobs:
           buildMethod: NativeLens.Utils.SceneBootstrap/BuildAPK
           customParameters: -quit -batchmode -nographics
           cacheKey: unity-${{ runner.os }}-2022.3.22f1
+          androidApiLevel: 33
       
       # 4. Upload APK as artifact
       - name: Upload APK
