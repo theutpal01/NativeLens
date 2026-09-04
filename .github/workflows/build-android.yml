@@ -5,13 +5,10 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  workflow_dispatch:  # Manual trigger via Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: read
-
-env:
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE || secrets.UNITY_SECRET }}
 
 jobs:
   build-android:
@@ -24,9 +21,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true  # Important for large assets
+          lfs: true
       
-      # 2. Cache Unity Library folder (speeds up subsequent builds)
+      # 2. Cache Unity Library folder
       - name: Cache Unity Library
         uses: actions/cache@v4
         with:
@@ -36,48 +33,33 @@ jobs:
           key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
           restore-keys: |
             unity-library-${{ runner.os }}-
-
-      - name: Validate Unity license secret
-        shell: bash
-        run: |
-          if [ -z "${UNITY_LICENSE}" ]; then
-            echo "::error::Unity license is missing. Set repository secret UNITY_LICENSE or UNITY_SECRET with full Unity_lic.ulf content."
-            exit 1
-          fi
-          if [ "${#UNITY_LICENSE}" -lt 100 ]; then
-            echo "::error::Unity license secret appears incomplete. Paste the full Unity_lic.ulf content, not just the XML header."
-            exit 1
-          fi
       
-      # 3. Activate Unity License (Personal/Free)
-      - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        # For Personal license, you can also use:
-        # UNITY_LICENSE: ${{ secrets.UNITY_LICENSE_PERSONAL }}
-      
-      # 4. Build Android APK
+      # 3. Build Android APK (includes license activation inside Docker)
       - name: Build Android APK
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
+          unityVersion: 2022.3.22f1
           targetPlatform: Android
           buildMethod: NativeLens.Utils.SceneBootstrap/BuildAPK
           customParameters: -quit -batchmode -nographics
-          skipActivation: true
+          cacheKey: unity-${{ runner.os }}-2022.3.22f1
       
-      # 5. Upload APK as artifact
+      # 4. Upload APK as artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: NativeLens-APK
-          path: build/NativeLens.apk
+          path: build/Android/Android.apk
           retention-days: 30
       
-      # 6. Create Release (on tag push)
+      # 5. Create Release (on tag push)
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
-          files: build/NativeLens.apk
+          files: build/Android/Android.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -96,25 +78,13 @@ jobs:
         with:
           path: Library
           key: unity-library-test-${{ runner.os }}-${{ hashFiles('Packages/manifest.json') }}
-
-      - name: Validate Unity license secret
-        shell: bash
-        run: |
-          if [ -z "${UNITY_LICENSE}" ]; then
-            echo "::error::Unity license is missing. Set repository secret UNITY_LICENSE or UNITY_SECRET with full Unity_lic.ulf content."
-            exit 1
-          fi
-          if [ "${#UNITY_LICENSE}" -lt 100 ]; then
-            echo "::error::Unity license secret appears incomplete. Paste the full Unity_lic.ulf content, not just the XML header."
-            exit 1
-          fi
-      
-      - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
       
       - name: Run Tests
-        uses: game-ci/unity-test-runner@v4
+        uses: game-ci/unity-test-runner@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
+          unityVersion: 2022.3.22f1
           testMode: playmode
           artifactsPath: test-results
       
