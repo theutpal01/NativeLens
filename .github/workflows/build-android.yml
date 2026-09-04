@@ -36,14 +36,14 @@ jobs:
       
       # 3. Install Unity
       - name: Setup Unity
-        uses: game-ci/unity-installer@v4
+        uses: game-ci/unity-installer@v2
         with:
           unityVersion: 2022.3.22f1
           cacheKey: unity-${{ runner.os }}-2022.3.22f1
       
       # 4. Activate Unity License (Personal/Free)
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         # For Personal license, you can also use:
@@ -51,7 +51,7 @@ jobs:
       
       # 5. Build Android APK
       - name: Build Android APK
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
@@ -93,17 +93,17 @@ jobs:
           key: unity-library-test-${{ runner.os }}-${{ hashFiles('Packages/manifest.json') }}
       
       - name: Setup Unity
-        uses: game-ci/unity-installer@v4
+        uses: game-ci/unity-installer@v2
         with:
           unityVersion: 2022.3.22f1
       
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       
       - name: Run Tests
-        uses: game-ci/unity-test-runner@v4
+        uses: game-ci/unity-test-runner@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
